@@ -1,0 +1,11 @@
+{
+  "files": [
+    "letterPuzzle.ts"
+  ],
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "outDir": "out",
+    "sourceMap": true
+  }
+}
