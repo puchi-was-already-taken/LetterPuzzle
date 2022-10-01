@@ -8,47 +8,47 @@ uses
 type
   TRuleSet = class(TObject)
   private
-    Fcondition: string;
-    FstrippingChars: string;
-    Fsubstitution: string;
+    FCondition: string;
+    FStrippingChars: string;
+    FSubstitution: string;
   public
-    constructor Create(strippingChars, substitution, condition: string);
+    constructor Create(StrippingChars, Substitution, Condition: string);
 
-    property strippingChars: string read FstrippingChars write FstrippingChars;
-    property substitution: string read Fsubstitution write Fsubstitution;
-    property condition: string read Fcondition write Fcondition;
+    property StrippingChars: string read FStrippingChars write FStrippingChars;
+    property Substitution: string read FSubstitution write FSubstitution;
+    property Condition: string read FCondition write FCondition;
   end;
 
   TRule = class(TObject)
   private
-    FruleSets: TObjectList<TRuleSet>;
-    Fflag: string;
-    Faffix: string;
+    FRuleSets: TObjectList<TRuleSet>;
+    FFlag: string;
+    FAffix: string;
   public
     constructor Create(const Flag, Affix: string);
     destructor Destroy; override;
 
-    function containsRuleSet(StrippingChars, Substitution, Condition: string): Boolean;
+    function ContainsRuleSet(StrippingChars, Substitution, Condition: string): Boolean;
 
-    property flag: string read Fflag write Fflag;
-    property affix: string read Faffix write Faffix;
-    property ruleSets: TObjectList<TRuleSet>read FruleSets;
+    property Flag: string read FFlag write FFlag;
+    property Affix: string read FAffix write FAffix;
+    property RuleSets: TObjectList<TRuleSet>read FRuleSets;
   end;
 
-function findRule(const rules: TObjectList<TRule>; flag: string; const affix: string = ''): TRule;
-function generateRuleList(const rawRules: TStringList): TObjectList<TRule>;
+function FindRule(const Rules: TObjectList<TRule>; Flag: string; const Affix: string = ''): TRule;
+function GenerateRuleList(const RawRules: TStringList): TObjectList<TRule>;
 
 implementation
 
-function findRule(const rules: TObjectList<TRule>; flag: string; const affix: string = ''): TRule;
+function FindRule(const Rules: TObjectList<TRule>; Flag: string; const Affix: string = ''): TRule;
 var
-  rule: TRule;
+  Rule: TRule;
 begin
-  for rule in rules do
+  for Rule in Rules do
   begin
-    if (flag = rule.flag) and ((affix = '') or (affix = rule.affix)) then
+    if (Flag = Rule.Flag) and ((Affix = '') or (Affix = Rule.Affix)) then
     begin
-      Result := rule;
+      Result := Rule;
       Exit;
     end;
   end;
@@ -56,65 +56,65 @@ begin
   Result := nil;
 end;
 
-function generateRuleList(const rawRules: TStringList): TObjectList<TRule>;
+function GenerateRuleList(const RawRules: TStringList): TObjectList<TRule>;
 var
-  element, substitution, strippingChars, condition: string;
-  elements: TArray<string>;
-  rule: TRule;
+  Element, Substitution, StrippingChars, Condition: string;
+  Elements: TArray<string>;
+  Rule: TRule;
 begin
   Result := TObjectList<TRule>.Create(True);
 
-  for element in rawRules do
+  for Element in RawRules do
   begin
-    if (Length(element) > 0) and (element[1] <> '#') then
+    if (Length(Element) > 0) and (Element[1] <> '#') then
     begin
-      elements := element.Split([' ', #9], TStringSplitOptions.ExcludeEmpty);
-      if Length(elements) = 5 then
+      Elements := Element.Split([' ', #9], TStringSplitOptions.ExcludeEmpty);
+      if Length(Elements) = 5 then
       begin
-        rule := findRule(Result, elements[1].Trim, elements[0].Trim);
+        Rule := FindRule(Result, Elements[1].Trim, Elements[0].Trim);
 
-        if not Assigned(rule) then
+        if not Assigned(Rule) then
         begin
-          rule := TRule.Create(elements[1].Trim, elements[0].Trim);
-          Result.Add(rule);
+          Rule := TRule.Create(Elements[1].Trim, Elements[0].Trim);
+          Result.Add(Rule);
         end;
 
-        substitution := elements[3].Trim.ToLower;
-        if substitution = '0' then
+        Substitution := Elements[3].Trim.ToLower;
+        if Substitution = '0' then
         begin
-          substitution := '';
+          Substitution := '';
         end;
 
-        if rule.affix = 'PFX' then
+        if Rule.Affix = 'PFX' then
         begin
-          if elements[2].Trim = '0' then
+          if Elements[2].Trim = '0' then
           begin
-            strippingChars := '^';
+            StrippingChars := '^';
           end
           else
           begin
-            strippingChars := '\b' + elements[2].Trim.ToLower;
+            StrippingChars := '\b' + Elements[2].Trim.ToLower;
           end;
 
-          condition := '\b' + elements[4].Trim.ToLower;
+          Condition := '\b' + Elements[4].Trim.ToLower;
         end
         else
         begin
-          if elements[2].Trim = '0' then
+          if Elements[2].Trim = '0' then
           begin
-            strippingChars := '$';
+            StrippingChars := '$';
           end
           else
           begin
-            strippingChars := elements[2].Trim.ToLower + '\b';
+            StrippingChars := Elements[2].Trim.ToLower + '\b';
           end;
 
-          condition := elements[4].Trim.ToLower + '\b';
+          Condition := Elements[4].Trim.ToLower + '\b';
         end;
 
-        if not rule.containsRuleSet(strippingChars, substitution, condition) then
+        if not Rule.ContainsRuleSet(StrippingChars, Substitution, Condition) then
         begin
-          rule.ruleSets.Add(TRuleSet.Create(strippingChars, substitution, condition));
+          Rule.RuleSets.Add(TRuleSet.Create(StrippingChars, Substitution, Condition));
         end;
       end;
     end;
@@ -123,23 +123,23 @@ end;
 
 { TRuleSet }
 
-constructor TRuleSet.Create(strippingChars, substitution, condition: string);
+constructor TRuleSet.Create(StrippingChars, Substitution, Condition: string);
 begin
-  FstrippingChars := strippingChars;
-  Fsubstitution := substitution;
-  Fcondition := condition;
+  FStrippingChars := StrippingChars;
+  FSubstitution := Substitution;
+  FCondition := Condition;
 end;
 
 { TRule }
 
-function TRule.containsRuleSet(StrippingChars, Substitution, Condition: string): Boolean;
+function TRule.ContainsRuleSet(StrippingChars, Substitution, Condition: string): Boolean;
 var
-  ruleSet: TRuleSet;
+  RuleSet: TRuleSet;
 begin
-  for ruleSet in ruleSets do
+  for RuleSet in RuleSets do
   begin
-    if (StrippingChars = ruleSet.strippingChars) and (Substitution = ruleSet.substitution) and
-      (Condition = ruleSet.condition) then
+    if (StrippingChars = RuleSet.StrippingChars) and (Substitution = RuleSet.Substitution) and
+      (Condition = RuleSet.Condition) then
     begin
       Result := True;
       Exit;
@@ -151,18 +151,15 @@ end;
 
 constructor TRule.Create(const Flag, Affix: string);
 begin
-  Fflag := Flag;
-  Faffix := Affix;
-  FruleSets := TObjectList<TRuleSet>.Create(True);
+  FFlag := Flag;
+  FAffix := Affix;
+  FRuleSets := TObjectList<TRuleSet>.Create(True);
 end;
 
 destructor TRule.Destroy;
 begin
-  FruleSets.Free;
+  FRuleSets.Free;
   inherited;
 end;
 
 end.
-
-
-

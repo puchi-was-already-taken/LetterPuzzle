@@ -5,39 +5,39 @@ interface
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, uAffLogic;
 
-function fitsFilterCharCounts(const item, charFilter: string; const charCounts: TList<Integer>):
+function FitsFilterCharCounts(const Item, CharFilter: string; const CharCounts: TList<Integer>):
   Boolean;
-function generateWordList(const rawWordList: TStringList; const affixRules: TObjectList<TRule>; const
-  charFilter: string; const charCounts: TList<Integer>; const blackList: TStringList): TStringList;
+function generateWordList(const RawWordList: TStringList; const AffixRules: TObjectList<TRule>; const
+  CharFilter: string; const CharCounts: TList<Integer>; const BlackList: TStringList): TStringList;
 
 implementation
 
 uses
   JclStrings, RegularExpressionsCore;
 
-function fitsFilter(const item, charFilter: string): Boolean;
+function FitsFilter(const Item, CharFilter: string): Boolean;
 var
-  i, j: Integer;
-  itemChar, filterChar: PChar;
-  found: Boolean;
+  I, j: Integer;
+  ItemChar, FilterChar: PChar;
+  Found: Boolean;
 begin
-  itemChar := PChar(item);
-  filterChar := PChar(charFilter);
+  ItemChar := PChar(Item);
+  FilterChar := PChar(CharFilter);
 
-  for i := 0 to item.Length - 1 do
+  for I := 0 to Item.Length - 1 do
   begin
-    found := False;
+    Found := False;
 
-    for j := 0 to charFilter.Length - 1 do
+    for j := 0 to CharFilter.Length - 1 do
     begin
-      if (itemChar + i)^ = (filterChar + j)^ then
+      if (ItemChar + I)^ = (FilterChar + j)^ then
       begin
-        found := True;
+        Found := True;
         Break;
       end;
     end;
 
-    if not found then
+    if not Found then
     begin
       Exit(False);
     end;
@@ -46,34 +46,34 @@ begin
   Result := True;
 end;
 
-function fitsFilterCharCounts(const item, charFilter: string; const charCounts: TList<Integer>):
+function FitsFilterCharCounts(const Item, CharFilter: string; const CharCounts: TList<Integer>):
   Boolean;
 var
-  i, j, filterCharCount: Integer;
-  itemChar, filterChar: PChar;
+  I, j, FilterCharCount: Integer;
+  ItemChar, FilterChar: PChar;
 begin
-  if not fitsFilter(item, charFilter) then
+  if not FitsFilter(Item, CharFilter) then
   begin
     Result := False;
     Exit;
   end;
 
-  itemChar := PChar(item);
-  filterChar := PChar(charFilter);
+  ItemChar := PChar(Item);
+  FilterChar := PChar(CharFilter);
 
-  for i := 0 to charFilter.Length - 1 do
+  for I := 0 to CharFilter.Length - 1 do
   begin
-    filterCharCount := 0;
+    FilterCharCount := 0;
 
-    for j := 0 to item.Length - 1 do
+    for j := 0 to Item.Length - 1 do
     begin
-      if (itemChar + j)^ = (filterChar + i)^ then
+      if (ItemChar + j)^ = (FilterChar + I)^ then
       begin
-        Inc(filterCharCount);
+        Inc(FilterCharCount);
       end;
     end;
 
-    if filterCharCount > charCounts[i] then
+    if FilterCharCount > CharCounts[I] then
     begin
       Result := False;
       Exit;
@@ -83,11 +83,12 @@ begin
   Result := True;
 end;
 
-function pushToList(const list: TStringList; const charFilter: string; const charCounts: TList<Integer>; const item: string): Boolean;
+function PushToList(const List: TStringList; const CharFilter: string; const CharCounts:
+  TList<Integer>; const Item: string): Boolean;
 begin
-  if (item.length > 0) and fitsFilterCharCounts(item, charFilter, charCounts) then
+  if (Item.Length > 0) and FitsFilterCharCounts(Item, CharFilter, CharCounts) then
   begin
-    list.Add(item);
+    List.Add(Item);
     Result := True;
     Exit;
   end;
@@ -95,80 +96,80 @@ begin
   Result := False;
 end;
 
-procedure cleanDoubles(list: TStringList);
+procedure CleanDoubles(List: TStringList);
 var
-  i: Integer;
+  I: Integer;
 begin
-  list.Sort;
+  List.Sort;
 
-  for i := list.Count - 2 downto 0 do
+  for I := List.Count - 2 downto 0 do
   begin
-    if list[i] = list[i + 1] then
+    if List[I] = List[I + 1] then
     begin
-      list.Delete(i + 1);
+      List.Delete(I + 1);
     end;
   end;
 end;
 
-function generateWordList(const rawWordList: TStringList; const affixRules: TObjectList<TRule>; const
-  charFilter: string; const charCounts: TList<Integer>; const blackList: TStringList): TStringList;
+function generateWordList(const RawWordList: TStringList; const AffixRules: TObjectList<TRule>; const
+  CharFilter: string; const CharCounts: TList<Integer>; const BlackList: TStringList): TStringList;
 var
-  line, baseWord, wordForm: string;
-  elements: TArray<string>;
-  baseList: TStringList;
-  flag: char;
-  rule: TRule;
-  ruleSet: TRuleSet;
+  Line, BaseWord, WordForm: string;
+  Elements: TArray<string>;
+  BaseList: TStringList;
+  Flag: Char;
+  Rule: TRule;
+  RuleSet: TRuleSet;
   RegEx: TPerlRegEx;
-  i: Integer;
+  I: Integer;
 begin
   Result := TStringList.Create;
-  baseList := TStringList.Create;
+  BaseList := TStringList.Create;
   RegEx := TPerlRegEx.Create;
   try
     RegEx.State := RegEx.State - [preNotEmpty];
     RegEx.Options := RegEx.Options + [preCaseLess];
 
-    for line in rawWordList do
+    for Line in RawWordList do
     begin
-      if (line.Trim.Length > 0) and (line[1] <> '#') and not StrIsDigit(line) then
+      if (Line.Trim.Length > 0) and (Line[1] <> '#') and not StrIsDigit(Line) then
       begin
-        elements := line.Split(['/'], TStringSplitOptions.ExcludeEmpty);
+        Elements := Line.Split(['/'], TStringSplitOptions.ExcludeEmpty);
 
-        baseWord := elements[0].ToLower;
-        if (blackList.IndexOf(baseWord) = -1) and pushToList(Result, charFilter, charCounts, baseWord)
-          and (Length(elements) > 1) then
+        BaseWord := Elements[0].ToLower;
+        if (BlackList.IndexOf(BaseWord) = -1) and PushToList(Result, CharFilter, CharCounts,
+          BaseWord) and (Length(Elements) > 1) then
         begin
-          baseList.Clear;
+          BaseList.Clear;
 
-          for i := 1 to elements[1].Length do
+          for I := 1 to Elements[1].Length do
           begin
-            flag := elements[1][i];
-            rule := findRule(affixRules, flag);
+            Flag := Elements[1][I];
+            Rule := FindRule(AffixRules, Flag);
 
-            if Assigned(rule) then
+            if Assigned(Rule) then
             begin
-              for ruleSet in rule.ruleSets do
+              for RuleSet in Rule.RuleSets do
               begin
-                if ruleSet.substitution.Length > 0 then
+                if RuleSet.Substitution.Length > 0 then
                 begin
-                  RegEx.RegEx := ruleSet.condition;
-                  RegEx.Subject := baseWord;
+                  RegEx.RegEx := RuleSet.Condition;
+                  RegEx.Subject := BaseWord;
 
                   if RegEx.Match then
                   begin
-                    RegEx.RegEx := ruleSet.strippingChars;
-                    RegEx.Replacement := ruleSet.substitution;
+                    RegEx.RegEx := RuleSet.StrippingChars;
+                    RegEx.Replacement := RuleSet.Substitution;
 
                     if RegEx.Match then
                     begin
                       RegEx.Replace;
-                      wordForm := RegEx.Subject;
+                      WordForm := RegEx.Subject;
 
-                      if baseList.indexOf(wordForm) = -1 then
+                      if BaseList.IndexOf(WordForm) = -1 then
                       begin
-                        baseList.Add(wordForm);
-                        pushToList(Result, charFilter, charCounts, wordForm);
+                        BaseList.Add(WordForm);
+                        PushToList(Result, CharFilter, CharCounts, WordForm);
                       end;
                     end;
                   end;
@@ -180,13 +181,11 @@ begin
       end;
     end;
 
-    cleanDoubles(Result);
+    CleanDoubles(Result);
   finally
-    baseList.Free;
+    BaseList.Free;
   end;
 end;
 
 end.
-
-
 
