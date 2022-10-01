@@ -33,7 +33,7 @@ int main()
 
     if (duration == 0)
     {
-        std::cout << "Duration: " << 0 << "sec Count: " << result.size() << ": " << result.at(result.size() - 1);
+        std::cout << "Duration: " << 0 << "sec Count: " << result.size() << " : " << result.at(result.size() - 1);
     }
     else
     {

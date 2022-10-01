@@ -63,7 +63,14 @@ void depthFirstSearch(const bool &wordOnlyOnce, const std::vector<std::string> &
         if (result.size() % 1000 == 0)
         {
             int64_t duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - start).count();
-            std::cout << "Count: " << result.size() << " (" << result.size() / (duration / 1000000.0) << " / sec): " << result.at(result.size() - 1) << std::endl;
+            if (duration == 0)
+            {
+                std::cout << "Count: " << result.size() << " : " << result.at(result.size() - 1) << std::endl;
+            }
+            else
+            {
+                std::cout << "Count: " << result.size() << " (" << result.size() / (duration / 1000000.0) << " / sec): " << result.at(result.size() - 1) << std::endl;
+            }
         }
     }
     else

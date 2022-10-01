@@ -53,7 +53,14 @@ function depthFirstSearch(wordOnlyOnce: Boolean, words: string[], startIndex: nu
 
         if (result.length % 1000 === 0) {
             let duration = new Date().getTime() - start;
-            console.log(`Count: ${result.length} (${(result.length / (duration / 1000))} / sec): ${result[result.length - 1]}`);
+            if (duration == 0)
+            {
+                console.log(`Count: ${result.length} : ${result[result.length - 1]}`);
+            }
+            else
+            {
+                console.log(`Count: ${result.length} (${(result.length / (duration / 1000))} / sec): ${result[result.length - 1]}`);
+            }
         };
     } else {
         for (let i = startIndex; i >= 0; i--) {
@@ -114,6 +121,14 @@ var start = new Date().getTime();
 depthFirstSearch(true, words, words.length - 1, lettersBudget, '', result);
 
 let duration = new Date().getTime() - start;
-console.log(`Duration: ${duration / 1000}sec Count: ${result.length} (${(result.length / (duration / 1000))} / sec): ${result[result.length - 1]}`);
+
+if (duration == 0)
+{
+    console.log(`Duration: ${0}sec Count: ${result.length} : ${result[result.length - 1]}`);
+}
+else
+{
+    console.log(`Duration: ${duration / 1000}sec Count: ${result.length} (${(result.length / (duration / 1000))} / sec): ${result[result.length - 1]}`);
+}
 
 fs.writeFileSync('results', result.join('\r\n'));
