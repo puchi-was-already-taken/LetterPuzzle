@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { Rule, RuleSet, generateRuleList } from './affLogic';
+import { generateRuleList } from './affLogic';
 import { fitsFilterCharCounts, generateWordList } from './dicLogic';
 
 interface LetterBudget {
@@ -96,11 +96,7 @@ const lettersBudget: LetterBudget = {
     count: 0
 };
 
-//initLetterBudget(['eeeeeee', 'tt', 'l', 'iiiii', 'f', 'nnnn', 'ü', 'rr', 'u', 'h', 'c', 'ss', 'g', 'a', 'b', 'm'], lettersBudget);
-initLetterBudget(['aa', 'e','hh','ll','o','i','r','d', 'nn', 't', 'u'], lettersBudget);
-//initLetterBudget(['a', 'd', 'e', 'hh', 'ii', 'll', 'o', 'rr'], lettersBudget);
-//initLetterBudget(['aa','hh','ll','o','i','r','d'], lettersBudget);
-//initLetterBudget(['a', 'h', 'll', 'o'], lettersBudget);
+initLetterBudget(['aa', 'e', 'hh', 'll', 'o', 'i', 'r', 'd', 'nn', 't', 'u'], lettersBudget); // "hallo ihr da unten"
 
 const aff = fs.readFileSync('../hunspell/de_DE_frami_mod.aff');
 const rules = generateRuleList(aff.toString().split('\r\n'));
@@ -111,14 +107,13 @@ const words = generateWordList(dic.toString().split('\r\n'), rules, lettersBudge
 
 prepareWordList(words, 2);
 
-fs.writeFileSync('words.txt', words.join('\r\n'));
+const result: string[] = [];
 
 var start = new Date().getTime();
 
-const result: string[] = [];
 depthFirstSearch(true, words, words.length - 1, lettersBudget, '', result);
 
 let duration = new Date().getTime() - start;
-console.log(`Duration: ${duration /1000}sec Count: ${result.length} (${(result.length / (duration / 1000))} / sec): ${result[result.length - 1]}`);
+console.log(`Duration: ${duration / 1000}sec Count: ${result.length} (${(result.length / (duration / 1000))} / sec): ${result[result.length - 1]}`);
 
-fs.writeFileSync('combinations.txt', result.join('\r\n'));
+fs.writeFileSync('results', result.join('\r\n'));

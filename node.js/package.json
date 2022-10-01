@@ -5,7 +5,9 @@
     "start": "node ."
   },
   "devDependencies": {
-    "@types/node": "^18.6.3",
-    "typescript": "^4.7.4"
+    "@types/node": "^18.6.3"
+  },
+  "dependencies": {
+    "typescript": "^4.8.4"
   }
 }

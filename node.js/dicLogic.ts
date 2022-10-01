@@ -1,4 +1,4 @@
-import { Rule, RuleSet, findRule } from './affLogic';
+import { Rule, findRule } from './affLogic';
 
 function fitsFilter(item: string, charFilter: string): Boolean {
     for (let i = 0; i < item.length; i++) {
