@@ -3,7 +3,7 @@ unit uLetterPuzzle;
 interface
 
 uses
-  System.Classes, System.Generics.Collections;
+  System.Classes, System.Generics.Collections, uDicLogic;
 
 type
   TLetterBudget = class(TObject)
@@ -11,13 +11,15 @@ type
     FChars: string;
     FCount: Integer;
     FCharCounts: TList<Integer>;
+    FCharsRef: TStringRef;
     constructor Create; overload;
   public
-    constructor Create(const Word: string; const LetterBudget: TLetterBudget); overload;
+    constructor Create(const Word: TStringRef; const LetterBudget: TLetterBudget); overload;
     constructor Create(const Letters: array of string); overload;
     destructor Destroy; override;
 
     property Chars: string read FChars;
+    property CharsRef: TStringRef read FCharsRef;
     property CharCounts: TList<Integer>read FCharCounts;
     property Count: Integer read FCount;
   end;
@@ -32,14 +34,14 @@ procedure prepareWordList(Words: TStringList; const minWordLength: Integer);
 implementation
 
 uses
-  System.SysUtils, Windows, uDicLogic;
+  System.SysUtils, Windows;
 
 procedure DepthFirstSearch(const WordOnlyOnce: Boolean; const Words: TStringList; const
   StartIndex: Integer; const Budget: TLetterBudget; const Path: string; const Result: TStringList);
 var
   Duration: UInt64;
   I: Integer;
-  Word: string;
+  WordRef: TStringRef;
 begin
   try
     if (Budget.Count = 0) then
@@ -52,11 +54,11 @@ begin
 
         if Duration = 0 then
         begin
-          Writeln(Format('Count: %d: %s', [Result.Count, Result[Result.Count - 1]]));
+          Writeln(Format('Count: %d: %s', [Result.Count, Path]));
         end
         else
         begin
-          Writeln(Format('Count: %d (%f / sec): %s', [Result.Count, Result.Count / (Duration / 1000), Result[Result.Count - 1]]));
+          Writeln(Format('Count: %d (%f / sec): %s', [Result.Count, Result.Count / (Duration / 1000), Path]));
         end;
       end;
     end
@@ -64,23 +66,23 @@ begin
     begin
       for I := StartIndex downto 0 do
       begin
-        Word := Words[I];
+        WordRef := TStringRef(Words.Objects[I]);
 
-        if Word.Length > Budget.Count then
+        if WordRef.Length > Budget.Count then
         begin
           // Words array is expected to be sorted by length.
           Exit;
         end;
 
-        if FitsFilterCharCounts(Word, Budget.Chars, Budget.CharCounts) then
+        if FitsFilterCharCounts(WordRef, Budget.CharsRef, Budget.CharCounts) then
         begin
           if WordOnlyOnce then
           begin
-            DepthFirstSearch(WordOnlyOnce, Words, I - 1, TLetterBudget.Create(Word, Budget), Path + ',' + Word, Result);
+            DepthFirstSearch(WordOnlyOnce, Words, I - 1, TLetterBudget.Create(WordRef, Budget), Path + ',' + Words[I], Result);
           end
           else
           begin
-            DepthFirstSearch(WordOnlyOnce, Words, I, TLetterBudget.Create(Word, Budget), Path + ',' + Word, Result);
+            DepthFirstSearch(WordOnlyOnce, Words, I, TLetterBudget.Create(WordRef, Budget), Path + ',' + Words[I], Result);
           end;
         end;
       end;
@@ -112,22 +114,25 @@ end;
 
 { TLetterBudget }
 
-constructor TLetterBudget.Create(const Word: string; const LetterBudget: TLetterBudget);
+constructor TLetterBudget.Create(const Word: TStringRef; const LetterBudget: TLetterBudget);
 var
-  I, FilterCharCount, J: Integer;
+  WordLength, FilterCharLength, I, FilterCharCount, J: Integer;
   FilterChar, WordChar: PChar;
 begin
   Create;
-  FCharCounts.Capacity := LetterBudget.Chars.Length;
 
-  WordChar := PChar(Word);
-  FilterChar := PChar(LetterBudget.Chars);
+  WordChar := Word.Ref;
+  WordLength := Word.Length;
+  FilterChar := LetterBudget.CharsRef.Ref;
+  FilterCharLength := LetterBudget.CharsRef.Length;
 
-  for I := 0 to LetterBudget.Chars.Length - 1 do
+  FCharCounts.Capacity := FilterCharLength;
+
+  for I := 0 to FilterCharLength - 1 do
   begin
     FilterCharCount := 0;
 
-    for J := 0 to Word.Length - 1 do
+    for J := 0 to WordLength - 1 do
     begin
       if (WordChar + J)^ = (FilterChar + I)^ then
       begin
@@ -135,14 +140,17 @@ begin
       end;
     end;
 
-    if LetterBudget.CharCounts[I] <> FilterCharCount then
+    FilterCharCount := LetterBudget.CharCounts[I] - FilterCharCount;
+
+    if FilterCharCount > 0 then
     begin
       FChars := FChars + (FilterChar + I)^;
-      FCharCounts.Add(LetterBudget.CharCounts[I] - FilterCharCount);
+      FCharCounts.Add(FilterCharCount);
+      Inc(FCount, FilterCharCount);
     end;
-
-    FCount := FCount + LetterBudget.CharCounts[I] - FilterCharCount;
   end;
+
+  FCharsRef := TStringRef.Create(FChars);
 end;
 
 constructor TLetterBudget.Create(const Letters: array of string);
@@ -157,6 +165,8 @@ begin
     FCount := FCount + Letters[I].Length;
     FCharCounts.Add(Letters[I].Length);
   end;
+
+  FCharsRef := TStringRef.Create(FChars);
 end;
 
 constructor TLetterBudget.Create;

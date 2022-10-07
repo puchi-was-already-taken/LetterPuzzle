@@ -5,8 +5,21 @@ interface
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, uAffLogic;
 
+type
+  TStringRef = class(TObject)
+  private
+    FRef: PChar;
+    FLength: Integer;
+  public
+    constructor Create(Str: string);
+    property Ref: PChar read FRef;
+    property Length: Integer read FLength;
+  end;
+
+function FitsFilterCharCounts(const Item, CharFilter: TStringRef; const CharCounts: TList<Integer>):
+  Boolean; overload;
 function FitsFilterCharCounts(const Item, CharFilter: string; const CharCounts: TList<Integer>):
-  Boolean;
+  Boolean; overload;
 function generateWordList(const RawWordList: TStringList; const AffixRules: TObjectList<TRule>; const
   CharFilter: string; const CharCounts: TList<Integer>; const BlackList: TStringList): TStringList;
 
@@ -15,22 +28,32 @@ implementation
 uses
   JclStrings, RegularExpressionsCore;
 
-function FitsFilter(const Item, CharFilter: string): Boolean;
+{ TStringRef }
+
+constructor TStringRef.Create(Str: string);
+begin
+  FRef := PChar(Str);
+  FLength := Str.Length;
+end;
+
+function FitsFilter(const Item, CharFilter: TStringRef): Boolean;
 var
-  I, j: Integer;
+  I, J, ItemLength, FilterCharLength: Integer;
   ItemChar, FilterChar: PChar;
   Found: Boolean;
 begin
-  ItemChar := PChar(Item);
-  FilterChar := PChar(CharFilter);
+  ItemChar := Item.Ref;
+  ItemLength := Item.Length;
+  FilterChar := CharFilter.Ref;
+  FilterCharLength := CharFilter.Length;
 
-  for I := 0 to Item.Length - 1 do
+  for I := 0 to ItemLength - 1 do
   begin
     Found := False;
 
-    for j := 0 to CharFilter.Length - 1 do
+    for J := 0 to FilterCharLength - 1 do
     begin
-      if (ItemChar + I)^ = (FilterChar + j)^ then
+      if (ItemChar + I)^ = (FilterChar + J)^ then
       begin
         Found := True;
         Break;
@@ -49,7 +72,22 @@ end;
 function FitsFilterCharCounts(const Item, CharFilter: string; const CharCounts: TList<Integer>):
   Boolean;
 var
-  I, j, FilterCharCount: Integer;
+  tmpItemRef, tmpCharFilterRef: TStringRef;
+begin
+  tmpItemRef := TStringRef.Create(Item);
+  tmpCharFilterRef := TStringRef.Create(CharFilter);
+  try
+    Result := FitsFilterCharCounts(tmpItemRef, tmpCharFilterRef, CharCounts);
+  finally
+    tmpCharFilterRef.Free;
+    tmpItemRef.Free;
+  end;
+end;
+
+function FitsFilterCharCounts(const Item, CharFilter: TStringRef; const CharCounts: TList<Integer>):
+  Boolean; overload;
+var
+  I, J, ItemLength, FilterCharLength, FilterCharCount: Integer;
   ItemChar, FilterChar: PChar;
 begin
   if not FitsFilter(Item, CharFilter) then
@@ -58,16 +96,18 @@ begin
     Exit;
   end;
 
-  ItemChar := PChar(Item);
-  FilterChar := PChar(CharFilter);
+  ItemChar := Item.Ref;
+  ItemLength := Item.Length;
+  FilterChar := CharFilter.Ref;
+  FilterCharLength := CharFilter.Length;
 
-  for I := 0 to CharFilter.Length - 1 do
+  for I := 0 to FilterCharLength - 1 do
   begin
     FilterCharCount := 0;
 
-    for j := 0 to Item.Length - 1 do
+    for J := 0 to ItemLength - 1 do
     begin
-      if (ItemChar + j)^ = (FilterChar + I)^ then
+      if (ItemChar + J)^ = (FilterChar + I)^ then
       begin
         Inc(FilterCharCount);
       end;
@@ -88,7 +128,7 @@ function PushToList(const List: TStringList; const CharFilter: string; const Cha
 begin
   if (Item.Length > 0) and FitsFilterCharCounts(Item, CharFilter, CharCounts) then
   begin
-    List.Add(Item);
+    List.AddObject(Item, TStringRef.Create(Item));
     Result := True;
     Exit;
   end;
