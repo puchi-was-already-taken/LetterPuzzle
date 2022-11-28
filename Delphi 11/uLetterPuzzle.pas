@@ -134,7 +134,7 @@ begin
 
     for J := 0 to WordLength - 1 do
     begin
-      if (WordChar + J)^ = (FilterChar + I)^ then
+      if WordChar[J] = FilterChar[I] then
       begin
         Inc(FilterCharCount);
       end;
@@ -144,7 +144,7 @@ begin
 
     if FilterCharCount > 0 then
     begin
-      FChars := FChars + (FilterChar + I)^;
+      FChars := FChars + FilterChar[I];
       FCharCounts.Add(FilterCharCount);
       Inc(FCount, FilterCharCount);
     end;

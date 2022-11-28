@@ -53,7 +53,7 @@ begin
 
     for J := 0 to FilterCharLength - 1 do
     begin
-      if (ItemChar + I)^ = (FilterChar + J)^ then
+      if ItemChar[I] = FilterChar[J] then
       begin
         Found := True;
         Break;
@@ -107,7 +107,7 @@ begin
 
     for J := 0 to ItemLength - 1 do
     begin
-      if (ItemChar + J)^ = (FilterChar + I)^ then
+      if ItemChar[J] = FilterChar[I] then
       begin
         Inc(FilterCharCount);
       end;
