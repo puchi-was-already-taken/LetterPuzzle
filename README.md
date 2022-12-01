@@ -4,7 +4,7 @@ Therefore I implemented a simple program which makes heavy use of string compari
 The program is searching for a chain of Words fitting a given budget of letters.
 
 By default TypeScript, executed via node.js, easily wins out against the Delphi binary.
-Only with the help of quite heavy optimizations is the Delphi code able to "score" a tie.
+Only with the help of some quite heavy code optimizations is the Delphi binary able to "score" a tie.
 Beyond that, it is only marginally possible to get the Delphi code to run faster. (We are talking at max. ~1 second.)
 Aside from that, of the implementations i wrote by now, C++ with optimization level 2 is the undisputed performace king.
 
