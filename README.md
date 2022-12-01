@@ -1,12 +1,12 @@
 # LetterPuzzle
-I wanted to compare the performance of Delphi code against TypeScript in string intensive tasks.
+I wanted to get a rough understanding about the difference of performance between Delphi code and TypeScript in string intensive tasks.
 Therefore I implemented a simple program which makes heavy use of string comparison and concatenation.
 The program is searching for a chain of Words fitting a given budget of letters.
 
 By default TypeScript, executed via node.js, easily wins out against the Delphi binary.
 Only with the help of quite heavy optimizations is the Delphi code able to "score" a tie.
 Beyond that, it is only marginally possible to get the Delphi code to run faster. (We are talking at max. ~1 second.)
-Aside from that, C++ with optimization level 2 is the undisputed performace king!
+Aside from that, of the implementations i wrote by now, C++ with optimization level 2 is the undisputed performace king.
 
 All performance tests where run on an AMD Ryzen 3700X CPU.
 
