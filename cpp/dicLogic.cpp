@@ -31,7 +31,7 @@ WordList::WordList(std::vector<std::string> &rawWordList, Rules &affixRules, con
 {
     for (const std::string &line : rawWordList)
     {
-        if (trim(line).length() > 0 && line.at(1) != '#' && !strIsDigit(line))
+        if (trim(line).length() > 0 && line.at(0) != '#' && !strIsDigit(line))
         {
             std::vector<std::string> elements = split(line, "/");
             std::string baseWord = lowerCase(elements.at(0));
