@@ -63,7 +63,7 @@ namespace LetterPuzzle
 
   class WordList
   {
-    private Boolean StrIsDigit(string str)
+    private static Boolean StrIsDigit(string str)
     {
       return !string.IsNullOrEmpty(str) && str.All(char.IsDigit);
     }
@@ -79,14 +79,14 @@ namespace LetterPuzzle
           string[] elements = line.Split('/');
           string baseWord = elements[0].ToLower();
 
-          List<string> baseList = new List<string>();
+          List<string> baseList = new();
           if (!blackList.Contains(baseWord) && PushToList(charFilter, charCounts, baseWord) && elements.Length > 1)
           {
             baseList.Clear();
 
             foreach (char flag in elements[1])
             {
-              Rule rule = affixRules.FindRule(flag);
+              Rule? rule = affixRules.FindRule(flag);
 
               if (rule != null)
               {
@@ -94,11 +94,11 @@ namespace LetterPuzzle
                 {
                   if (!string.IsNullOrEmpty(ruleSet.Substitution))
                   {
-                    Regex regExp = new Regex(ruleSet.Condition, RegexOptions.IgnoreCase);
+                    Regex regExp = new(ruleSet.Condition, RegexOptions.IgnoreCase);
 
                     if (regExp.IsMatch(baseWord))
                     {
-                      regExp = new Regex(ruleSet.StrippingChars, RegexOptions.IgnoreCase);
+                      regExp = new(ruleSet.StrippingChars, RegexOptions.IgnoreCase);
                       string wordForm = regExp.Replace(baseWord, ruleSet.Substitution);
 
                       if (!List.Contains(wordForm))
@@ -133,7 +133,7 @@ namespace LetterPuzzle
     {
       List.Sort();
 
-      for (int i = List.Count() - 2; i >= 0; i--)
+      for (int i = List.Count - 2; i >= 0; i--)
       {
         if (List[i] == List[i + 1])
         {

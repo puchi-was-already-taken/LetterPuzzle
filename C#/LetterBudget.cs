@@ -4,15 +4,8 @@ namespace LetterPuzzle
 {
   class LetterBudget
   {
-    private void Init()
-    {
-      CharCounts = new List<int>();
-    }
-
     public LetterBudget(string word, LetterBudget letterBudget)
     {
-      Init();
-
       CharCounts.Capacity = letterBudget.Chars.Length;
 
       for (int i = 0; i < letterBudget.Chars.Length; i++)
@@ -39,8 +32,6 @@ namespace LetterPuzzle
 
     public LetterBudget(string[] letters)
     {
-      Init();
-
       foreach (string letter in letters)
       {
         Chars += letter[0];
@@ -50,8 +41,8 @@ namespace LetterPuzzle
     }
 
 
-    public string Chars { get; private set; }
-    public List<int> CharCounts { get; private set; }
+    public string Chars { get; private set; } = "";
+    public List<int> CharCounts { get; private set; } = new List<int>();
     public int Count { get; private set; }
   }
 }

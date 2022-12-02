@@ -21,7 +21,7 @@ namespace LetterPuzzle
   {
     public Rule(char flag, string affix)
     {
-      RuleSets = new List<RuleSet>();
+      RuleSets = new();
       this.Flag = flag;
       this.Affix = affix;
     }
@@ -50,7 +50,7 @@ namespace LetterPuzzle
 
     public Rules(string[] rawRules)
     {
-      List = new List<Rule>();
+      List = new();
 
       foreach (string element in rawRules)
       {
@@ -59,11 +59,11 @@ namespace LetterPuzzle
           string[] elements = element.Split(separators, StringSplitOptions.RemoveEmptyEntries);
           if (elements.Length == 5 && !string.IsNullOrEmpty(elements[1]))
           {
-            Rule rule = FindRule(elements[1][0], elements[0]);
+            Rule? rule = FindRule(elements[1][0], elements[0]);
 
             if (rule == null)
             {
-              rule = new Rule(elements[1][0], elements[0]);
+              rule = new(elements[1][0], elements[0]);
               List.Add(rule);
             }
 
@@ -104,14 +104,14 @@ namespace LetterPuzzle
 
             if (!rule.ContainsRuleSet(strippingChars, substitution, condition))
             {
-              rule.RuleSets.Add(new RuleSet(strippingChars, substitution, condition));
+              rule.RuleSets.Add(new(strippingChars, substitution, condition));
             }
           }
         }
       }
     }
 
-    public Rule FindRule(char flag, string affix = "")
+    public Rule? FindRule(char flag, string affix = "")
     {
       foreach (Rule rule in List)
       {

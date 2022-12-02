@@ -7,7 +7,7 @@ namespace LetterPuzzle
 {
   class Program
   {
-    private static Stopwatch stopWatch;
+    private static readonly Stopwatch stopWatch = new();
 
     static void Main()
     {
@@ -15,25 +15,23 @@ namespace LetterPuzzle
 
       aff = System.IO.File.ReadAllLines("../../../hunspell/de_DE_frami_mod.aff");
       dic = System.IO.File.ReadAllLines("../../../hunspell/de_DE_frami.dic");
-      Console.WriteLine("aff-count: {0}", aff.Count());
-      Console.WriteLine("dic-count: {0}", dic.Count());
+      Console.WriteLine("aff-count: {0}", aff.Length);
+      Console.WriteLine("dic-count: {0}", dic.Length);
 
-      Rules rules = new Rules(aff);
-      Console.WriteLine("rule-count: {0}", rules.List.Count());
+      Rules rules = new(aff);
+      Console.WriteLine("rule-count: {0}", rules.List.Count);
 
-      LetterBudget letterBudget = new LetterBudget(new[] { "aa", "e", "hh", "ll", "o", "i", "r", "d", "nn", "t", "u" }); // "hallo ihr da unten"
+      LetterBudget letterBudget = new(new[] { "aa", "e", "hh", "ll", "o", "i", "r", "d", "nn", "t", "u" }); // "hallo ihr da unten"
 
-      List<string> blacklist = new List<string>
+      List<string> blacklist = new()
       {
         "utrecht"
       };
 
-      WordList wordList = new WordList(dic, rules, letterBudget.Chars, letterBudget.CharCounts, blacklist);
+      WordList wordList = new(dic, rules, letterBudget.Chars, letterBudget.CharCounts, blacklist);
       wordList.PrepareWordList(2);
 
-      List<string> result = new List<string>();
-
-      stopWatch = new Stopwatch();
+      List<string> result = new();
 
       stopWatch.Start();
       DepthFirstSearch(true, wordList.List, 0, letterBudget, "", result);
@@ -84,7 +82,7 @@ namespace LetterPuzzle
 
           if (Filter.FitsFilterCharCounts(words[i], budget.Chars, budget.CharCounts))
           {
-            LetterBudget letterBudget = new LetterBudget(words[i], budget);
+            LetterBudget letterBudget = new(words[i], budget);
             if (wordOnlyOnce)
             {
               DepthFirstSearch(wordOnlyOnce, words, i + 1, letterBudget, path + ',' + words[i], result);
