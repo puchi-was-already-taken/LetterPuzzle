@@ -5,7 +5,7 @@ The program is searching for a chain of Words fitting a given budget of letters.
 
 By default TypeScript, executed via node.js, easily wins out against the Delphi binary.<br>
 Only with the help of some quite heavy code optimizations is the Delphi binary able to "score" a tie.<br>
-Beyond that, it is only marginally possible to get the Delphi code to run faster. (We are talking at max. ~1 second.)<br>
+Beyond that, I was only marginally able to get the Delphi code to run faster while also making it even uglier. (We are talking at max. ~1 second.)<br>
 Aside from that, of the implementations I wrote by now, C++ (with compiler optimization level 2) is the fastest.
 
 All performance tests where run on an AMD Ryzen 3700X CPU.
